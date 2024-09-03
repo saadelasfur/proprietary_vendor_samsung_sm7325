@@ -1,4 +1,4 @@
-name: Check firmware update (m52xq)
+name: Check firmware update
 
 on:
   workflow_dispatch:
@@ -14,7 +14,22 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # M52XQ
+          # sm7325
+          - model: "SM-A528B"
+            csc: "BTU"
+            omc: "OXM"
+          - model: "SM-A528B"
+            csc: "INS"
+            omc: "ODM"
+          - model: "SM-A528N"
+            csc: "SKC"
+            omc: "OKR"
+          - model: "SM-A736B"
+            csc: "ZTO"
+            omc: "OWO"
+          - model: "SM-A736B"
+            csc: "INS"
+            omc: "ODM"
           - model: "SM-M526B"
             csc: "INS"
             omc: "ODM"
@@ -66,15 +81,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y liblz4-tool zip simg2img f2fs-tools
-          sudo wget -O /usr/bin/samfirm https://github.com/DavidArsene/samfirm.js/releases/download/v0.3.0/samfirm.js && sudo chmod +x /usr/bin/samfirm
+          # build samfirm from source
+          git clone https://github.com/DavidArsene/samfirm.js.git && cd samfirm.js
+          npm install --silent
+          npm run --silent build
+          sudo cp --preserve=all "dist/index.js" "/usr/bin/samfirm" && sudo chmod +x /usr/bin/samfirm
+          cd .. && rm -rf samfirm.js
 
       - name: Fetch firmware
         if: env.need_update == 1
         run: |
-          if [[ "${{ matrix.model }}" == "SM-M526BR" ]]; then
-              imei="355568761234563"
-          else
+          if [[ "${{ matrix.model }}" == "SM-A528B" ]]; then
+              imei="352599501234566"
+          elif [[ "${{ matrix.model }}" == "SM-A528N" ]]; then
+              imei="354049881234560"
+          elif [[ "${{ matrix.model }}" == "SM-A736B" ]]; then
+              imei="352828291234563"
+          elif [[ "${{ matrix.model }}" == "SM-M526B" ]]; then
               imei="358205231234561"
+          else
+              imei="355568761234563"
           fi
           samfirm -m ${{ matrix.model }} -r ${{ matrix.csc }} -i $imei
 
