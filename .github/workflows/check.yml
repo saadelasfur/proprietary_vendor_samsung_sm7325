@@ -80,7 +80,7 @@ jobs:
         if: env.need_update == 1
         run: |
           sudo apt-get update
-          sudo apt-get install -y liblz4-tool zip simg2img f2fs-tools
+          sudo apt-get install -y liblz4-tool zip android-sdk-libsparse-utils f2fs-tools
           # build samfirm from source
           git clone https://github.com/DavidArsene/samfirm.js.git && cd samfirm.js
           npm install --silent
